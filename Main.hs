@@ -1,24 +1,26 @@
 module Main where
 
 main :: IO ()
-main = print (findById(1) :: Maybe User)
+main = print (findById(89) :: Maybe User)
 
-data User = User Int String String deriving (Eq, Show)
+newtype Password = Password String deriving (Show, Eq)
+data User = User { userId :: Int, name::String, pwd::Password }
+            deriving (Eq, Show)
 
 class Repository a where
   findAll :: [a]
   findById :: Int -> Maybe a
 
-class SafeList a where
-  safeHead :: [a] -> Maybe a
-  safeHead [] = Nothing
-  safeHead (x:_) = Just x
-
-instance SafeList User
-
 instance Repository User where
-  findAll = [User 1 "Andrii" "Ivanov", User 2 "Olya" "Ivanova"]
-  findById id = (safeHead . filter(byId id)) findAll
+  findAll = [
+             User{userId = 1, name = "Andrii", pwd = Password "pwd"},
+             User{userId = 2, name = "Olya", pwd = Password "pwd2"}
+            ]
+  findById id = (safeHead . filter(by userId id)) findAll
 
-byId :: Int -> User -> Bool
-byId id = \x -> case x of (User uid _ _) -> uid == id
+by :: Eq b => (a -> b) -> b -> a -> Bool
+by f value record = f record == value
+
+safeHead :: [a] -> Maybe a
+safeHead [] = Nothing
+safeHead (x:_) = Just x
