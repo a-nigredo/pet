@@ -1,15 +1,27 @@
 module Main where
 
 main :: IO ()
-main = print (findById(89) :: Maybe User)
+
+main = let id = 1 in print (do
+  user <-  case (findById(id) :: Maybe User) of Just user -> Right user
+                                                Nothing -> Left "User not found";
+  validationResult <- validate user;
+  return validationResult)
 
 newtype Password = Password String deriving (Show, Eq)
-data User = User { userId :: Int, name::String, pwd::Password }
-            deriving (Eq, Show)
+data User = User { userId :: Int, name::String, pwd::Password } deriving (Eq, Show)
+
+class Validator a where
+  validate :: a -> Either String a
 
 class Repository a where
   findAll :: [a]
   findById :: Int -> Maybe a
+
+instance Validator User where
+  validate user = if length(name user) < 20
+    then Left "Name too short"
+    else Right user
 
 instance Repository User where
   findAll = [
