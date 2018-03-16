@@ -2,14 +2,17 @@ module Main where
 
 main :: IO ()
 
-main = let id = 1 in print (do
-  user <-  case (findById(id) :: Maybe User) of Just user -> Right user
-                                                Nothing -> Left "User not found";
-  validationResult <- validate user;
-  return validationResult)
+main = do putStrLn "Hello, put an user id?"
+          id <- getLine
+          do {
+            user <- (case (findById(id) :: Maybe User) of Just user -> Right user
+                                                          Nothing -> Left "User not found");
+            res <- validate user;
+            print res;
+          }
 
 newtype Password = Password String deriving (Show, Eq)
-data User = User { userId :: Int, name::String, pwd::Password } deriving (Eq, Show)
+data User = User { userId::Int, name::String, pwd::Password } deriving (Eq, Show)
 
 class Validator a where
   validate :: a -> Either String a
