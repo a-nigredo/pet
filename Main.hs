@@ -4,12 +4,8 @@ main :: IO ()
 
 main = do putStrLn "Hello, put an user id?"
           id <- getLine
-          do {
-            user <- (case (findById(id) :: Maybe User) of Just user -> Right user
-                                                          Nothing -> Left "User not found");
-            res <- validate user;
-            print res;
-          }
+          putStrLn (findById(read id) >>= \u -> validate(u) >>= \x -> case x of Left error -> error
+                                                                                Right user -> show user)
 
 newtype Password = Password String deriving (Show, Eq)
 data User = User { userId::Int, name::String, pwd::Password } deriving (Eq, Show)
