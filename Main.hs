@@ -1,11 +1,20 @@
 module Main where
 
+import Control.Monad.Trans.Either
+
 main :: IO ()
 
-main = do putStrLn "Hello, put an user id?"
-          id <- getLine
-          putStrLn (findById(read id) >>= \u -> validate(u) >>= \x -> case x of Left error -> error
-                                                                                Right user -> show user)
+main = do
+      res <- runST $ do {
+        id <- lift getLine;
+        user <- (case findById(read id) of Nothing -> Left "User not found"
+                                           Just user -> Right user);
+        validation <- lift validate(user);
+        (case validation of Left error -> lift $ putStrLn error
+                            Right user -> lift $ putStrLn(show user));
+      };
+      (case res of Left n -> putStrLn $ show n
+                   Right u -> putStrLn $ show u)
 
 newtype Password = Password String deriving (Show, Eq)
 data User = User { userId::Int, name::String, pwd::Password } deriving (Eq, Show)
